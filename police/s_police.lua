@@ -142,6 +142,16 @@ function DespawnPoliceCar(player)
     -- TODO : use garage
 end
 --------- POLICE VEHICLE
+
+--------- INTERACTIONS
+function CuffPlayer(player, target)
+end
+function UncuffPlayer(player, target)
+end
+function FinePlayer(player, target, amount, reason)
+end
+--------- INTERACTIONS
+
 -- DEV MODE
 AddCommand("pol", function(player)
     StartService(player)
