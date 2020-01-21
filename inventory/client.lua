@@ -2,8 +2,8 @@ local _ = function(k,...) return ImportPackage("i18n").t(GetPackageName(),k,...)
 
 local personalMenu
 
-AddRemoteEvent("OpenPersonalMenu", function(key, items, inventory, playerName, playerId, playerList, maxSlots)
-    OpenUIInventory(key, items, inventory, playerName, playerId, playerList, maxSlots)
+AddRemoteEvent("OpenPersonalMenu", function(items, inventory, playerName, playerId, playerList, maxSlots, searchedPlayer)
+    OpenUIInventory(items, inventory, playerName, playerId, playerList, maxSlots, searchedPlayer)
 end)
 
 function itemUsedInInventory(event)
@@ -38,9 +38,9 @@ AddEvent("OnKeyPress", function( key )
         local vehicle = GetPlayerVehicle()
 
         if vehicle ~= 0 then
-            CallRemoteEvent("ServerPersonalMenu", GetVehicleForwardSpeed(vehicle))
+            CallRemoteEvent("ServerPersonalMenu", true, GetVehicleForwardSpeed(vehicle))
         else
-            CallRemoteEvent("ServerPersonalMenu", 0)
+            CallRemoteEvent("ServerPersonalMenu", false)
         end
     end
 end)

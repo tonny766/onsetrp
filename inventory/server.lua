@@ -4,20 +4,21 @@ local inventory_base_max_slots = 32
 
 local droppedObjectsPickups = {}
 
-AddRemoteEvent("ServerPersonalMenu", function(player, vehicleSpeed)
-    if vehicleSpeed > 0 then
-        CallRemoteEvent(player, "MakeSuccessNotification", _("cant_while_driving"))
-    else
-        local x, y, z = GetPlayerLocation(player)
-        local nearestPlayers = GetPlayersInRange3D(x, y, z, 1000)
-        local playerList = {}
-        for k,v in pairs(nearestPlayers) do
-            if k ~= player then
-                table.insert(playerList, { id = k, name = GetPlayerName(k) })
-            end
-        end
-        CallRemoteEvent(player, "OpenPersonalMenu", "I", Items, PlayerData[player].inventory, PlayerData[player].name, player, playerList, GetPlayerMaxSlots(player))
+AddRemoteEvent("ServerPersonalMenu", function(player, inVehicle, vehiclSpeed)
+    if inVehicle and GetPlayerState(player) == PS_DRIVER and vehiclSpeed > 0 then
+        return CallRemoteEvent(player, "MakeErrorNotification", _("cant_while_driving"))
     end
+
+    local x, y, z = GetPlayerLocation(player)
+    local nearestPlayers = GetPlayersInRange3D(x, y, z, 1000)
+    local playerList = {}
+    for k,v in pairs(nearestPlayers) do
+        if k ~= player then
+            table.insert(playerList, { id = k, name = GetPlayerName(k) })
+        end
+    end
+
+    CallRemoteEvent(player, "OpenPersonalMenu", Items, PlayerData[player].inventory, PlayerData[player].name, player, playerList, GetPlayerMaxSlots(player))
 end)
 
 
@@ -29,9 +30,8 @@ function getWeaponID(modelid)
 end
 
 AddRemoteEvent("UseInventory", function(player, itemName, amount, inVehicle, vehiclSpeed)
-    print("UseInventory")
     if inVehicle and GetPlayerState(player) == PS_DRIVER and vehiclSpeed > 0 then
-        return CallRemoteEvent(player, "MakeNotification", _("cant_while_driving"), "linear-gradient(to right, #ff5f6d, #ffc371)")
+        return CallRemoteEvent(player, "MakeErrorNotification", _("cant_while_driving"))
     end
 
     local item
@@ -201,7 +201,7 @@ end)
 
 AddRemoteEvent("RemoveFromInventory", function(player, item, amount)
     if PlayerData[player].inventory[item] < tonumber(amount) then
-        CallRemoteEvent(player, "MakeNotification", _("not_enough_item"), "linear-gradient(to right, #ff5f6d, #ffc371)")
+        CallRemoteEvent(player, "MakeErrorNotification", _("not_enough_item"))
     else
         RemoveInventory(tonumber(player), item, tonumber(amount), 1)
     end
