@@ -43,7 +43,7 @@ AddRemoteEvent("UseInventory", function(player, itemName, amount, inVehicle, veh
     end
 
     weapon = getWeaponID(itemName)
-    if tonumber(PlayerData[player].inventory[itemName]) < tonumber(amount) then
+    if tonumber() < tonumber(amount) then
         AddPlayerChat(player, _("not_enough_item"))
     else
         if weapon ~= 0 then
@@ -168,7 +168,7 @@ function UseItem(player, item, amount, animation)
     SetPlayerAnimation(player, animation)
 end
 
-AddRemoteEvent("TransferInventory", function(player, item, amount, toPlayer)
+AddRemoteEvent("TransferInventory", function(player, originPlayer, item, amount, toPlayer)
     local x, y, z = GetPlayerLocation(player)
     local nearestPlayers = GetPlayersInRange3D(x, y, z, 1000)
     local toPlayerIsHere = false
@@ -179,14 +179,14 @@ AddRemoteEvent("TransferInventory", function(player, item, amount, toPlayer)
     end
     
     if toPlayerIsHere then
-        if PlayerData[player].inventory[item] < tonumber(amount) then
-            CallRemoteEvent(player, "MakeSuccessNotification", _("not_enough_item"))
+        if PlayerData[originPlayer].inventory[item] < tonumber(amount) then
+            CallRemoteEvent(originPlayer, "MakeErrorNotification", _("not_enough_item"))
         else
             AddInventory(tonumber(toPlayer), item, tonumber(amount))
-            RemoveInventory(tonumber(player), item, tonumber(amount))
+            RemoveInventory(tonumber(originPlayer), item, tonumber(amount))
             
-            CallRemoteEvent(player, "MakeNotification", _("successful_transfer", amount, item, GetPlayerName(tonumber(toPlayer))), "linear-gradient(to right, #00b09b, #96c93d)")
-            CallRemoteEvent(tonumber(toPlayer), "MakeNotification", _("received_transfer", amount, item, GetPlayerName(player)), "linear-gradient(to right, #00b09b, #96c93d)")
+            CallRemoteEvent(originPlayer, "MakeNotification", _("successful_transfer", amount, item, GetPlayerName(tonumber(toPlayer))), "linear-gradient(to right, #00b09b, #96c93d)")
+            CallRemoteEvent(tonumber(toPlayer), "MakeNotification", _("received_transfer", amount, item, GetPlayerName(originPlayer)), "linear-gradient(to right, #00b09b, #96c93d)")
         end
     end
 end)

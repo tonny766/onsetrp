@@ -26,7 +26,7 @@ AddEvent('BURDIGALAX_inventory_onDelete', itemDeletedInInventory)
 
 function itemTransferedInInventory(event)
     local data = json_decode(event)
-    CallRemoteEvent("TransferInventory", data.idItem, data.quantity, data.destinationInventoryId)
+    CallRemoteEvent("TransferInventory", data.originInventoryId, data.idItem, data.quantity, data.destinationInventoryId)
 end
 AddEvent('BURDIGALAX_inventory_onTransfer', itemTransferedInInventory)
 
