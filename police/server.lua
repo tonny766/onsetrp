@@ -87,7 +87,7 @@ end)
 
 AddRemoteEvent("OpenPoliceFineMenu", function(player)
     if PlayerData[player].job == "police" then
-		local playersIds = GetClosePlayers(player)
+		local playersIds = GetClosePlayers(player, 300)
 		local playersNames = {}
 
 		for k,v in pairs(playersIds) do
@@ -106,10 +106,11 @@ end)
 AddRemoteEvent("OpenPoliceSearchMenu", function(player)
 	if PlayerData[player].job == "police" then
 		local searchablePlayers = { }
-		local closePlayers = GetClosePlayers(player, 150, "police")
+		local closePlayers = GetClosePlayers(player, 300, "police")
 
 		for k, v in pairs(closePlayers) do
 			if GetPlayerPropertyValue(k, "cuffed") then
+				print("Cuffed: "..v)
 				searchablePlayers[tostring(k)] = v
 			end
 		end
