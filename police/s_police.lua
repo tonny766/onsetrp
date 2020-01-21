@@ -86,9 +86,12 @@ AddEvent("job:onspawn", function(player)
     if PlayerData[player].job == "police" and PlayerData[player].police == 1 then -- Anti glitch
         GivePoliceEquipmentToPlayer(player)
     end
+
+    if PlayerData[player].is_cuffed == 1 then
+        SetPlayerCuffed(player, true)
+    end
 end)
 --------- SERVICE AND EQUIPMENT END
-
 --------- POLICE VEHICLE
 function SpawnPoliceCar(player)
     -- #1 Check for the police whitelist of the player
@@ -139,18 +142,77 @@ function DespawnPoliceCar(player)
         CallRemoteEvent(player, "MakeNotification", _("vehicle_stored"), "linear-gradient(to right, #00b09b, #96c93d)")
         return
     end
-    -- TODO : use garage
+-- TODO : use garage
 end
 --------- POLICE VEHICLE
+--------- INTERACTIONS
+function CuffPlayer(player)
+    if PlayerData[player].police == 0 or PlayerData[player].job ~= "police" then return end
+    
+    local target = GetNearestPlayer(player, distanceMax)    
+    if target ~= nil and PlayerData[target].is_cuffed ~= 1 then
+        SetPlayerCuffed(target, true)
+    end  
+end
 
---------- INTERACTIONS
-function CuffPlayer(player, target)
+function UncuffPlayer(player)
+    if PlayerData[player].police == 0 or PlayerData[player].job ~= "police" then return end
+
+    local target = GetNearestPlayer(player, distanceMax)    
+    if target ~= nil and PlayerData[target].is_cuffed == 1 then
+        SetPlayerCuffed(target, false)
+    end 
 end
-function UncuffPlayer(player, target)
+
+function SetPlayerCuffed(player, state)
+    if state == true then
+        -- # Empty the weapons shortcuts
+        SetPlayerWeapon(player, 1, 0, true, 1)
+        SetPlayerWeapon(player, 1, 0, false, 2)
+        SetPlayerWeapon(player, 1, 0, false, 3)
+        -- # Launch the cuffed animation
+        SetPlayerAnimation(player, "CUFF")
+        -- # Disable most of interactions
+        SetPlayerBusy(player)
+        -- # Set player as cuffed
+        PlayerData[player].is_cuffed = 1
+        -- # Set property value
+        SetPlayerPropertyValue(player, "cuffed", true, true)        
+    else
+        SetPlayerAnimation(player, "STOP")
+        SetPlayerNotBusy(player)
+        PlayerData[player].is_cuffed = 0
+        SetPlayerPropertyValue(player, "cuffed", false, true)
+    end
 end
+
 function FinePlayer(player, target, amount, reason)
+    
 end
 --------- INTERACTIONS
+
+-- Tools
+function GetNearestPlayer(player, distanceMax)
+    local x, y, z = GetPlayerLocation(player)
+    local listStreamed = GetStreamedPlayersForPlayer(player)
+    local closestDistance = 50000
+    local otherPlayer
+	local _x, _y, _z
+	
+    for k,v in pairs(listStreamed) do
+	    _x, _y, _z = GetPlayerLocation(v)
+	    local tmpDistance = GetDistance3D(x, y, z, _x, _y, _z)
+	    if(tmpDistance < closestDistance and v ~= player and tmpDistance < distanceMax) then
+			closestDistance = tmpDistance
+			otherPlayer = v
+	    end
+	end
+	
+    if(otherPlayer ~= nil) then
+		return {otherPlayer, _x, _y, _z}
+    end
+    return
+end
 
 -- DEV MODE
 AddCommand("pol", function(player)
@@ -167,4 +229,12 @@ end)
 
 AddCommand("polscar", function(player)
     DespawnPoliceCar(player)
+end)
+
+AddCommand("polcuff", function(player, target)
+    CuffPlayer(player, target)
+end)
+
+AddCommand("poluncuff", function(player, target)
+    UncuffPlayer(player, target)
 end)
