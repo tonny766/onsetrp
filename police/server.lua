@@ -105,17 +105,31 @@ end)
 
 AddRemoteEvent("OpenPoliceSearchMenu", function(player)
 	if PlayerData[player].job == "police" then
-		local searchablePlayers = { }
+		local searchablePlayer
 		local closePlayers = GetClosePlayers(player, 300, "police")
 
 		for k, v in pairs(closePlayers) do
 			if GetPlayerPropertyValue(k, "cuffed") then
-				print("Cuffed: "..v)
-				searchablePlayers[tostring(k)] = v
+				searchablePlayer = k
 			end
 		end
 
-		CallRemoteEvent(player, "OpenPoliceSearchMenu", searchablePlayers)
+		if searchablePlayer ~= nil then
+			local x, y, z = GetPlayerLocation(player)
+			local nearestPlayers = GetPlayersInRange3D(x, y, z, 1000)
+			local playerList = {}
+			for k,v in pairs(nearestPlayers) do
+				if k ~= player then
+					table.insert(playerList, { id = k, name = GetPlayerName(k) })
+				end
+			end
+			
+			searchedPlayer = { id = searchablePlayer, name = PlayerData[searchablePlayer].name, inventory = PlayerData[searchablePlayer].inventory }
+	
+			CallRemoteEvent(player, "OpenPersonalMenu", Items, PlayerData[player].inventory, PlayerData[player].name, player, playerList, GetPlayerMaxSlots(player), searchedPlayer)
+		end
+
+		-- CallRemoteEvent(player, "OpenPoliceSearchMenu", searchablePlayers)
     end
 end)
 
