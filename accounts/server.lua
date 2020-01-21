@@ -148,7 +148,7 @@ function OnAccountLoaded(player)
 		PlayerData[player].created = math.tointeger(result['created'])
 		PlayerData[player].position = json_decode(result['position'])
 		PlayerData[player].drug_knowledge = json_decode(result['drug_knowledge'])
-    
+		PlayerData[player].job = result['job']
 
 		if result['phone_number'] and result['phone_number'] ~= "" then
 			PlayerData[player].phone_number = tostring(result['phone_number'])
@@ -179,6 +179,8 @@ function OnAccountLoaded(player)
 		end
 		
 		LoadPlayerPhoneContacts(player)
+
+		CallEvent("job:onspawn" , player) -- Trigger the loading of jobs when player is fully loaded (have to be set up for each jobs)
 
 		print("Account ID "..PlayerData[player].accountid.." loaded for "..GetPlayerIP(player))
 	end
@@ -295,7 +297,7 @@ function SavePlayerAccount(player)
 	local x, y, z = GetPlayerLocation(player)
 	PlayerData[player].position = {x= x, y= y, z= z}
 
-	local query = mariadb_prepare(sql, "UPDATE accounts SET admin = ?, bank_balance = ?, health = ?, health_state = '?', death_pos = '?', armor = ?, hunger = ?, thirst = ?, name = '?', clothing = '?', inventory = '?', created = '?', position = '?', driver_license = ?, gun_license = ?, helicopter_license = ?, drug_knowledge = '?' WHERE id = ? LIMIT 1;",
+	local query = mariadb_prepare(sql, "UPDATE accounts SET admin = ?, bank_balance = ?, health = ?, health_state = '?', death_pos = '?', armor = ?, hunger = ?, thirst = ?, name = '?', clothing = '?', inventory = '?', created = '?', position = '?', driver_license = ?, gun_license = ?, helicopter_license = ?, drug_knowledge = '?', job = '?' WHERE id = ? LIMIT 1;",
 		PlayerData[player].admin,
 		PlayerData[player].bank_balance,
 		100,
@@ -313,6 +315,7 @@ function SavePlayerAccount(player)
 		PlayerData[player].gun_license,
 		PlayerData[player].helicopter_license,
 		json_encode(PlayerData[player].drug_knowledge),
+		PlayerData[player].job,
 		PlayerData[player].accountid
 	)
         
