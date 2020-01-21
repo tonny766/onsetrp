@@ -269,6 +269,10 @@ function GetPlayerCash(player)
     end
 end
 
+function GetNumberOfItem(player, item)
+    return tonumber(PlayerData[player].inventory[item]) or 0
+end
+
 function SetPlayerCash(player, amount)
     PlayerData[player].inventory['cash'] = math.max(math.tointeger(amount), 0)
 end
