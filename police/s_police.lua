@@ -187,7 +187,7 @@ function SetPlayerCuffed(player, state)
 end
 
 function FinePlayer(player, target, amount, reason)
-    
+
 end
 --------- INTERACTIONS
 
@@ -232,9 +232,9 @@ AddCommand("polscar", function(player)
 end)
 
 AddCommand("polcuff", function(player, target)
-    CuffPlayer(player, target)
+    SetPlayerCuffed(target, true)
 end)
 
 AddCommand("poluncuff", function(player, target)
-    UncuffPlayer(player, target)
+    SetPlayerCuffed(target, false)
 end)
