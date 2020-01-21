@@ -114,7 +114,7 @@ function BuildInventoryJson(items, playerInventory, playerName, playerId, player
     end
 
     if searchedPlayer ~= nil then
-        table.insert(json.inventories[1].selectedNearbyInventoryId, searchedPlayer.id)
+        json.inventories[1].selectedNearbyInventoryId = searchedPlayer.id
     end
 
     return json
