@@ -18,7 +18,7 @@ local policeNpc = {
 
 local policeNpcCached = {}
 local playerPolice = {}
-local policeText3D = {"police_job", "police_garage", "police_armory"}
+local policeText3D = { "police_job", "police_garage", "police_armory" }
 
 AddEvent("OnPackageStart", function()
     for k,v in pairs(policeNpc) do
@@ -93,13 +93,13 @@ AddRemoteEvent("OpenPoliceFineMenu", function(player)
 		for k,v in pairs(playersIds) do
 			if PlayerHaveName(k) then
 				local _x, _y, _z = GetPlayerLocation(k)
-				if(GetDistance3D(x, y, z, _x, _y, _z) < 500 and player ~= k and PlayerData[k].job ~= "police") then
+				if(GetDistance3D(x, y, z, _x, _y, _z) < 150 and player ~= k and PlayerData[k].job ~= "police") then
 					playersNames[tostring(k)] = PlayerData[k].name 
 				end
 			end
 		end
 
-		CallRemoteEvent(player, "OpenPoliceFineMenu", GetClosePlayers(player, 150, "police"))
+		CallRemoteEvent(player, "OpenPoliceFineMenu", playersNames)
     end
 end)
 
@@ -109,8 +109,8 @@ AddRemoteEvent("OpenPoliceSearchMenu", function(player)
 		local closePlayers = GetClosePlayers(player, 150, "police")
 
 		for k, v in pairs(closePlayers) do
-			if GetPlayerPropertyValue(info[1], "cuffed") then
-				searchablePlayers[k] = v
+			if GetPlayerPropertyValue(k, "cuffed") then
+				searchablePlayers[tostring(k)] = v
 			end
 		end
 

@@ -110,8 +110,6 @@ AddEvent("OnDialogSubmit", function(dialog, button, ...)
         end
     end
     if dialog == policeMenu then
-        print("PPP")
-        print(button)
         if button == 1 then
             CallRemoteEvent("HandcuffPlayerSetup")
         end
