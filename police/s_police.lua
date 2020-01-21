@@ -86,7 +86,8 @@ AddEvent("job:onspawn", function(player)
     if PlayerData[player].job == "police" and PlayerData[player].police == 1 then -- Anti glitch
         GivePoliceEquipmentToPlayer(player)
     end
-
+    
+    print(PlayerData[player].is_cuffed)
     if PlayerData[player].is_cuffed == 1 then
         SetPlayerCuffed(player, true)
     end
@@ -149,19 +150,19 @@ end
 function CuffPlayer(player)
     if PlayerData[player].police == 0 or PlayerData[player].job ~= "police" then return end
     
-    local target = GetNearestPlayer(player, distanceMax)    
+    local target = GetNearestPlayer(player, distanceMax)
     if target ~= nil and PlayerData[target].is_cuffed ~= 1 then
         SetPlayerCuffed(target, true)
-    end  
+    end
 end
 
 function UncuffPlayer(player)
     if PlayerData[player].police == 0 or PlayerData[player].job ~= "police" then return end
-
-    local target = GetNearestPlayer(player, distanceMax)    
+    
+    local target = GetNearestPlayer(player, distanceMax)
     if target ~= nil and PlayerData[target].is_cuffed == 1 then
         SetPlayerCuffed(target, false)
-    end 
+    end
 end
 
 function SetPlayerCuffed(player, state)
@@ -177,7 +178,7 @@ function SetPlayerCuffed(player, state)
         -- # Set player as cuffed
         PlayerData[player].is_cuffed = 1
         -- # Set property value
-        SetPlayerPropertyValue(player, "cuffed", true, true)        
+        SetPlayerPropertyValue(player, "cuffed", true, true)
     else
         SetPlayerAnimation(player, "STOP")
         SetPlayerNotBusy(player)
@@ -187,29 +188,44 @@ function SetPlayerCuffed(player, state)
 end
 
 function FinePlayer(player, target, amount, reason)
+    if PlayerData[player].police == 0 or PlayerData[player].job ~= "police" then return end
+    -- New table to store fines
+    local target = GetNearestPlayer(player, distanceMax)
+    if target ~= nil then
+        AddFineInDb(player, target, amount, reason)
+    end
+end
 
+function AddFineInDb(agentId, playerId, amount, reason)
+    local query = mariadb_prepare(sql, "INSERT INTO fines (`agent_id`, `player_id`, `amount`, `reason`) VALUES (?, ?, ?, '?');",
+        tonumber(agentId),
+        tonumber(playerId),
+        tonumber(amount),
+        tostring(reason))
+
+    local result = mariadb_async_query(sql, query)
+    return result
 end
 --------- INTERACTIONS
-
 -- Tools
 function GetNearestPlayer(player, distanceMax)
     local x, y, z = GetPlayerLocation(player)
     local listStreamed = GetStreamedPlayersForPlayer(player)
     local closestDistance = 50000
     local otherPlayer
-	local _x, _y, _z
-	
-    for k,v in pairs(listStreamed) do
-	    _x, _y, _z = GetPlayerLocation(v)
-	    local tmpDistance = GetDistance3D(x, y, z, _x, _y, _z)
-	    if(tmpDistance < closestDistance and v ~= player and tmpDistance < distanceMax) then
-			closestDistance = tmpDistance
-			otherPlayer = v
-	    end
-	end
-	
-    if(otherPlayer ~= nil) then
-		return {otherPlayer, _x, _y, _z}
+    local _x, _y, _z
+    
+    for k, v in pairs(listStreamed) do
+        _x, _y, _z = GetPlayerLocation(v)
+        local tmpDistance = GetDistance3D(x, y, z, _x, _y, _z)
+        if (tmpDistance < closestDistance and v ~= player and tmpDistance < distanceMax) then
+            closestDistance = tmpDistance
+            otherPlayer = v
+        end
+    end
+    
+    if (otherPlayer ~= nil) then
+        return {otherPlayer, _x, _y, _z}
     end
     return
 end
@@ -237,4 +253,8 @@ end)
 
 AddCommand("poluncuff", function(player, target)
     SetPlayerCuffed(target, false)
+end)
+
+AddCommand("polfine", function(agentId, playerId, amount, reason)
+    AddFineInDb(agentId, playerId, amount, reason)
 end)

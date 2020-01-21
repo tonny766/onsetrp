@@ -488,3 +488,15 @@ ALTER TABLE `whitelist`
 ALTER TABLE `player_garage`
   ADD CONSTRAINT `player_garage_ibfk_1` FOREIGN KEY (`ownerid`) REFERENCES `accounts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
+
+
+CREATE TABLE IF NOT EXISTS `fines` (
+  `id` smallint(6) NOT NULL AUTO_INCREMENT,
+  `fine_date` date NOT NULL DEFAULT curdate(),
+  `agent_id` smallint(6) NOT NULL DEFAULT 0,
+  `player_id` smallint(6) NOT NULL DEFAULT 0,
+  `amount` int(11) NOT NULL DEFAULT 0,
+  `reason` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `paid` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
