@@ -61,8 +61,8 @@ AddEvent('BURDIGALAX_inventory_onEquip', onEquipItemInventory)
 
 function onTransferItems(event)
     local data = json_decode(event)
-    ExecuteWebJS(inventoryUI, "setUpdateItemsInventories("..data.destinationInventoryId..","..data.idItem..","..data.newQuantityDestination..");")
-    ExecuteWebJS(inventoryUI, "setUpdateItemsInventories("..data.originInventoryId..","..data.idItem..","..data.newQuantityOrigin..");")
+    ExecuteWebJS(inventoryUI, "BURDIGALAX_inventory.updateItemsInventories("..data.destinationInventoryId..", [{ id: "..data.idItem..", quantity: "..data.newQuantityDestination.." }]);")
+    ExecuteWebJS(inventoryUI, "BURDIGALAX_inventory.updateItemsInventories("..data.originInventoryId..", [{ id: "..data.idItem..", quantity: "..data.newQuantityOrigin.." }]);")
 end
 AddEvent('BURDIGALAX_inventory_onTransfer', onTransferItems)
 

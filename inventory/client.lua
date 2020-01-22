@@ -11,16 +11,16 @@ function itemUsedInInventory(event)
     local vehicle = GetPlayerVehicle()
 
     if vehicle ~= 0 then
-        CallRemoteEvent("UseInventory", data.idItem, 1, true, GetVehicleForwardSpeed(vehicle))
+        CallRemoteEvent("UseInventory", data.idInventory, data.idItem, 1, true, GetVehicleForwardSpeed(vehicle))
     else
-        CallRemoteEvent("UseInventory", data.idItem, 1, false)
+        CallRemoteEvent("UseInventory", data.idInventory, data.idItem, 1, false)
     end
 end
 AddEvent('BURDIGALAX_inventory_onUse', itemUsedInInventory)
 
 function itemDeletedInInventory(event)
     local data = json_decode(event)
-    CallRemoteEvent("RemoveFromInventory", data.idItem, data.quantity, data.destinationInventoryId)
+    CallRemoteEvent("RemoveFromInventory", data.idInventory, data.idItem, data.quantity, data.destinationInventoryId)
 end
 AddEvent('BURDIGALAX_inventory_onDelete', itemDeletedInInventory)
 

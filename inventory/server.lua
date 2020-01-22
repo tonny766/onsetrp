@@ -29,7 +29,7 @@ function getWeaponID(modelid)
     return 0
 end
 
-AddRemoteEvent("UseInventory", function(player, itemName, amount, inVehicle, vehiclSpeed)
+AddRemoteEvent("UseInventory", function(player, originPlayer, itemName, amount, inVehicle, vehiclSpeed)
     if inVehicle and GetPlayerState(player) == PS_DRIVER and vehiclSpeed > 0 then
         return CallRemoteEvent(player, "MakeErrorNotification", _("cant_while_driving"))
     end
@@ -43,21 +43,21 @@ AddRemoteEvent("UseInventory", function(player, itemName, amount, inVehicle, veh
     end
 
     weapon = getWeaponID(itemName)
-    if tonumber() < tonumber(amount) then
+    if tonumber(PlayerData[originPlayer].inventory[itemName]) < tonumber(amount) then
         AddPlayerChat(player, _("not_enough_item"))
     else
         if weapon ~= 0 then
             SetPlayerWeapon(player, tonumber(weapon), 1000, true, 1)
         else
             if itemName == "donut" or  itemName == "apple" or itemName == "peach" or itemName == "water_bottle" then
-                UseItem(player, item, amount)
+                UseItem(player, originPlayer, item, amount)
             end
             if itemName == "health_kit" then
                 if GetPlayerHealth(player) == 100 then
                     AddPlayerChat(player, _("already_full_health"))
                 else
                     SetPlayerAnimation(player, "COMBINE")
-                    RemoveInventory(player, itemName, amount)
+                    RemoveInventory(originPlayer, itemName, amount)
                     SetPlayerHealth(player, 100)
                 end
             end
@@ -72,7 +72,7 @@ AddRemoteEvent("UseInventory", function(player, itemName, amount, inVehicle, veh
                         CallRemoteEvent(player, "LockControlMove", true)
                         SetPlayerAnimation(player, "COMBINE")
                         Delay(4000, function()
-                            RemoveInventory(player, itemName, amount)
+                            RemoveInventory(originPlayer, itemName, amount)
                             SetVehicleHealth(nearestCar, 5000)
                             for i=1,8 do
                                 SetVehicleDamage(nearestCar, i, 0)
@@ -95,7 +95,7 @@ AddRemoteEvent("UseInventory", function(player, itemName, amount, inVehicle, veh
                             CallRemoteEvent(player, "LockControlMove", true)
                             SetPlayerAnimation(player, "COMBINE")
                             Delay(4000, function()
-                                RemoveInventory(player, itemName, amount)
+                                RemoveInventory(originPlayer, itemName, amount)
                                 VehicleData[nearestCar].fuel = 100
                                 AddPlayerChat(player, _("car_refuelled"))
                                 CallRemoteEvent(player, "LockControlMove", false)
@@ -122,7 +122,7 @@ AddRemoteEvent("UseInventory", function(player, itemName, amount, inVehicle, veh
                             Delay(10000, function()
                                 SetVehiclePropertyValue( nearestCar, "locked", false, true)
                                 AddPlayerChat(player, _("car_unlocked"))
-                                RemoveInventory(player, itemName, amount)
+                                RemoveInventory(originPlayer, itemName, amount)
                                 CallRemoteEvent(player, "LockControlMove", false)
                                 SetPlayerAnimation(player, "STOP")
                             end)
@@ -146,7 +146,7 @@ AddRemoteEvent("UseInventory", function(player, itemName, amount, inVehicle, veh
                             Delay(10000, function()
                                 houses[nearestHouse].lock = false
                                 AddPlayerChat(player, _("unlock_house"))
-                                RemoveInventory(player, itemName, amount)
+                                RemoveInventory(originPlayer, itemName, amount)
                                 CallRemoteEvent(player, "LockControlMove", false)
                                 SetPlayerAnimation(player, "STOP")
                             end)
@@ -160,9 +160,9 @@ AddRemoteEvent("UseInventory", function(player, itemName, amount, inVehicle, veh
     end
 end)
 
-function UseItem(player, item, amount, animation)
+function UseItem(player, originPlayer, item, amount, animation)
     local animation = animation or "DRINKING"
-    RemoveInventory(player, item.name, amount)
+    RemoveInventory(originPlayer, item.name, amount)
     addPlayerHunger(player, item.hunger * amount)
     addPlayerThirst(player, item.thirst * amount)
     SetPlayerAnimation(player, animation)
@@ -182,8 +182,10 @@ AddRemoteEvent("TransferInventory", function(player, originPlayer, item, amount,
         if PlayerData[originPlayer].inventory[item] < tonumber(amount) then
             CallRemoteEvent(originPlayer, "MakeErrorNotification", _("not_enough_item"))
         else
-            AddInventory(tonumber(toPlayer), item, tonumber(amount))
+            SetPlayerAnimation(player, "PICKUP_MIDDLE")
+
             RemoveInventory(tonumber(originPlayer), item, tonumber(amount))
+            AddInventory(tonumber(toPlayer), item, tonumber(amount))
             
             CallRemoteEvent(originPlayer, "MakeNotification", _("successful_transfer", amount, item, GetPlayerName(tonumber(toPlayer))), "linear-gradient(to right, #00b09b, #96c93d)")
             CallRemoteEvent(tonumber(toPlayer), "MakeNotification", _("received_transfer", amount, item, GetPlayerName(originPlayer)), "linear-gradient(to right, #00b09b, #96c93d)")
@@ -199,11 +201,11 @@ AddEvent("OnPlayerSpawn", function(player)
     end
 end)
 
-AddRemoteEvent("RemoveFromInventory", function(player, item, amount)
-    if PlayerData[player].inventory[item] < tonumber(amount) then
+AddRemoteEvent("RemoveFromInventory", function(player, originPlayer, item, amount)
+    if PlayerData[originPlayer].inventory[item] < tonumber(amount) then
         CallRemoteEvent(player, "MakeErrorNotification", _("not_enough_item"))
     else
-        RemoveInventory(tonumber(player), item, tonumber(amount), 1)
+        RemoveInventory(tonumber(originPlayer), item, tonumber(amount), 1)
     end
 end)
 
