@@ -3,9 +3,9 @@ sql = false
 
 local SQL_HOST = "localhost"
 local SQL_PORT = 3306
-local SQL_USER = "root"
-local SQL_PASS = ""
-local SQL_DATA = "roleplay"
+local SQL_USER = "nanox"
+local SQL_PASS = "****"
+local SQL_DATA = "nanix_onset"
 local SQL_CHAR = "utf8mb4"
 local SQL_LOGL = "debug"
 
